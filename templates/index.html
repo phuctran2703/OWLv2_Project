@@ -29,8 +29,11 @@
                 type="file"
                 id="image"
                 name="image"
-                accept="image/*" />
+                accept="image/*"
+                onchange="previewImage(event)"/>
             </div>
+            <div id="tempImage"></div>
+            <br/>
             <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700" for="text"
                 >Enter text</label
