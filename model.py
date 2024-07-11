@@ -3,12 +3,13 @@ import json
 from PIL import Image
 import torch
 from transformers import AutoProcessor, Owlv2ForObjectDetection
+import io
 
-def process_image(image_path, texts):
+def process_image(image_bytes, texts):
     processor = AutoProcessor.from_pretrained("google/owlv2-base-patch16-ensemble")
     model = Owlv2ForObjectDetection.from_pretrained("google/owlv2-base-patch16-ensemble")
 
-    image = Image.open(image_path)
+    image = Image.open(io.BytesIO(image_bytes))
     inputs = processor(text=[texts], images=image, return_tensors="pt")
 
     with torch.no_grad():
@@ -34,7 +35,7 @@ def process_image(image_path, texts):
     return response
 
 if __name__ == '__main__':
-    image_path = sys.argv[1]
-    texts = sys.argv[2].split(',')
-    result = process_image(image_path, texts)
+    texts = sys.argv[1].split(',')
+    image_bytes = sys.stdin.buffer.read()
+    result = process_image(image_bytes, texts)
     print(json.dumps(result, indent=2))

@@ -1,53 +1,34 @@
-document.getElementById("upload-form").addEventListener("submit", function (event) {
-  event.preventDefault();
+document
+  .getElementById("upload-form")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
 
-  const formData = new FormData(this);
+    const formData = new FormData(this);
 
-  fetch("/upload", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      const imageUrl = data.image_url;
-      const jsonUrl = data.json_url;
-
-      // Fetch the JSON data
-      fetch(jsonUrl)
-        .then(response => response.json())
-        .then(jsonData => {
-          // Load the image and draw annotations
-          const img = new Image();
-          img.src = imageUrl;
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-
-            canvas.width = img.width;
-            canvas.height = img.height;
-            context.drawImage(img, 0, 0);
-
-            jsonData.forEach(item => {
-              const { label, box, score } = item;
-              const [x, y, width, height] = box;
-
-              // Draw the bounding box
-              context.strokeStyle = "green";
-              context.lineWidth = 3;
-              context.strokeRect(x, y, width - x, height - y);
-
-              // Draw the label and score
-              context.fillStyle = "yellow";
-              context.font = "16px Arial";
-              context.fillText(`${label}: ${score}`, x, y - 10);
-            });
-
-            // Display the annotated image
-            const resultImage = document.getElementById("result-image");
-            resultImage.src = canvas.toDataURL();
-            resultImage.style.display = "block";
-          };
-        });
+    fetch("/upload", {
+      method: "POST",
+      body: formData,
     })
-    .catch((error) => console.error("Error:", error));
-});
+      .then((response) => response.json())
+      .then((jsonData) => {
+        // Handle the JSON response directly
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = ""; // Clear any previous results
+
+        jsonData.forEach((item) => {
+          const { label, box, score } = item;
+          const [x, y, width, height] = box;
+
+          // Create and append result details
+          const resultItem = document.createElement("div");
+          resultItem.className = "result-item";
+          resultItem.innerHTML = `
+          <p><strong>Label:</strong> ${label}</p>
+          <p><strong>Box:</strong> [${x}, ${y}, ${width}, ${height}]</p>
+          <p><strong>Score:</strong> ${score}</p>
+        `;
+          resultDiv.appendChild(resultItem);
+        });
+      })
+      .catch((error) => console.error("Error:", error));
+  });
