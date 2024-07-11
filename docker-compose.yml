@@ -2,7 +2,7 @@ version: "2.27.1"
 
 services:
   app:
-    image: owl/python:v1
+    image: registry.gitlab.com/phuctran2703/owlv2_project
     ports:
       - "5000:5000"
     volumes:
