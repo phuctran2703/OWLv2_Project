@@ -1,0 +1,10 @@
+version: "2.27.1"
+
+services:
+  app:
+    image: owl/python:v1
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    restart: unless-stopped
