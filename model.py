@@ -1,19 +1,25 @@
-import sys
-import json
 from PIL import Image
 import torch
 from transformers import AutoProcessor, Owlv2ForObjectDetection
 import io
 
 def process_image(image_bytes, texts):
+    # print(torch.cuda.is_available())
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     processor = AutoProcessor.from_pretrained("google/owlv2-base-patch16-ensemble")
-    model = Owlv2ForObjectDetection.from_pretrained("google/owlv2-base-patch16-ensemble")
+    # model = Owlv2ForObjectDetection.from_pretrained("google/owlv2-base-patch16-ensemble")
+    model = Owlv2ForObjectDetection.from_pretrained("google/owlv2-base-patch16-ensemble").to(device)
+
 
     image = Image.open(io.BytesIO(image_bytes))
-    inputs = processor(text=[texts], images=image, return_tensors="pt")
+    # inputs = processor(text=[texts], images=image, return_tensors="pt")
+    inputs = processor(text=[texts], images=image, return_tensors="pt").to(device)
+
 
     with torch.no_grad():
         outputs = model(**inputs)
+
 
     target_sizes = torch.Tensor([image.size[::-1]])
     results = processor.post_process_object_detection(
@@ -33,9 +39,3 @@ def process_image(image_bytes, texts):
         })
 
     return response
-
-if __name__ == '__main__':
-    texts = sys.argv[1].split(',')
-    image_bytes = sys.stdin.buffer.read()
-    result = process_image(image_bytes, texts)
-    print(json.dumps(result, indent=2))
