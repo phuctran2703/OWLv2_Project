@@ -27,7 +27,6 @@ def upload():
 
     # Call the model.py script
     result = process_image(image_bytes, texts)
-    print(result)
     
     return result
 
